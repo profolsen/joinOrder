@@ -43,6 +43,7 @@ public class Main {
         solutions = new HashMap<HashSet<Table>, Join>();
     }
 
+    //find the best join order.
     static Join optimize(HashSet<Table> tables) {
         if(solutions.containsKey(tables)) return solutions.get(tables);
         if(tables.size() == 1) return tables.iterator().next(); //base case
