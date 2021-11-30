@@ -18,14 +18,14 @@ public class Main {
         System.out.println("\t" + t1 + "\n\t" + t2 + "\n\t" + t3);
         System.out.println("Join options: ");
         Join j1 = new Join(t3, new Join(t1, t2));
-        System.out.println("\t" + j1 + " " + j1.tuples());
+        System.out.println("\t" + j1 + " " + j1.joinCost());
         Join j4 = new Join(t1, new Join(t2, t3));
-        System.out.println("\t" + j4 + " " + j4.tuples());
+        System.out.println("\t" + j4 + " " + j4.joinCost());
         System.out.println("full cost of best option: ");
         Join j2 = new Join(t1, t3);
-        System.out.println("\t" + j2 + " " + j2.tuples());
+        System.out.println("\t" + j2 + " " + j2.joinCost());
         j2 = new Join(new Join(t1, t3), t2);
-        System.out.println("\t" + j2 + " " + j2.tuples());
+        System.out.println("\t" + j2 + " " + j2.joinCost());
 
         System.out.println("Using algorithm: ");
         HashSet<Table> h1 = new HashSet<Table>();
@@ -34,7 +34,7 @@ public class Main {
         h1.add(t3);
         resetSolutions();
         Join j3 = optimize(h1);
-        System.out.println("\t" + j3 + ": " + j3.tuples);
+        System.out.println("\t" + j3 + ": " + j3.joinCost());
     }
 
     static HashMap<HashSet<Table>, Join> solutions;
@@ -62,7 +62,7 @@ public class Main {
             Join j2 = optimize(others);
             Join current = new Join(j1, j2);
             //System.out.println("current = " + current);
-            if(best == null || current.tuples < best.tuples) best = current;
+            if(best == null || current.joinCost() < best.joinCost()) best = current;
         }
         solutions.put(tables, best);
         return best;
@@ -126,6 +126,7 @@ class Table extends Join {
         for(String s : attributes) {
             this.attributes.add(s);
         }
+        joinCost = tuples;
     }
 
     @Override
@@ -144,6 +145,7 @@ class Table extends Join {
 //can be tested, etc.
 class Join {
     int tuples = 0;
+    int joinCost = 0;
     Integer hashCode = null;
     Join left = null, right = null;
     HashSet<String> attributes = new HashSet<String>();
@@ -158,6 +160,7 @@ class Join {
             int duplicatedColumns = left.attributes.size() + right.attributes.size() - attributes.size();
             while(duplicatedColumns-- > 0) factor = factor * 0.5;
             tuples = (int)(factor * left.tuples() * right.tuples());
+            joinCost = tuples + left.joinCost + right.joinCost;
         }
     }
 
@@ -191,4 +194,6 @@ class Join {
     }
 
     public int tuples() {  return tuples;  }
+
+    public int joinCost() {  return joinCost;  }
 }
